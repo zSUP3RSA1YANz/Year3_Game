@@ -28,13 +28,14 @@ public class ClickToMove : MonoBehaviour
     {
         targetPosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
         targetPosition.z = transform.position.z;
+        targetPosition.y = transform.position.y;
 
         isMoving = true;
     }
 
     void move()
     {
-        transform.rotation = Quaternion.LookRotation(Vector3.forward, targetPosition);
+        //transform.rotation = Quaternion.LookRotation(Vector3.forward, targetPosition);
         transform.position = Vector3.MoveTowards(transform.position, targetPosition, speed * Time.deltaTime);
         if(transform.position == targetPosition)
         {
