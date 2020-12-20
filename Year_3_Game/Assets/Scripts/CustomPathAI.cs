@@ -10,9 +10,12 @@ public class CustomPathAI : MonoBehaviour
 
     public float speed = 200f;
     public float jumpForce = 200f;
+    public float longJumpForce = 400f;
     public float nextWaypointDistance = 3f;
 
     public bool forceMove;
+
+    private int steps;
 
     public Path path;
     int currentWaypoint = 0;
@@ -56,6 +59,11 @@ public class CustomPathAI : MonoBehaviour
         {
             transform.localScale = new Vector3(-1f, 1f, 1f);
         }
+
+        if (Input.GetMouseButtonDown(1))
+        {
+            longJumpRight();
+        }
     }
 
     void FixedUpdate()
@@ -63,6 +71,7 @@ public class CustomPathAI : MonoBehaviour
         if (forceMove)
         {
             move();
+            Debug.Log("Moves =" + steps);
         }
     }
 
@@ -109,8 +118,8 @@ public class CustomPathAI : MonoBehaviour
         if (path == null)
             return;
 
-        //Debug.Log("path size =" + " " + path.vectorPath.Count);
-        //Debug.Log("Current way point =" + " " + currentWaypoint);
+        Debug.Log("path size =" + " " + path.vectorPath.Count);
+        Debug.Log("Current way point =" + " " + currentWaypoint);
         if (currentWaypoint >= path.vectorPath.Count)
         {
             reachedEndOfPath = true;
@@ -119,7 +128,7 @@ public class CustomPathAI : MonoBehaviour
             PlayerPrefs.SetInt("isSelected", 0);
 
             currentWaypoint = 0;
-        //Debug.Log("path ended =" + " " + reachedEndOfPath);
+        Debug.Log("path ended =" + " " + reachedEndOfPath);
         //    Debug.Log("Selection =" + " " + PlayerPrefs.GetInt("isSelected"));
             //Debug.Log("moving =" + " " + forceMove);
             return;
@@ -127,6 +136,8 @@ public class CustomPathAI : MonoBehaviour
         else
         {
             reachedEndOfPath = false;
+            Debug.Log("path size =" + " " + path.vectorPath.Count);
+            Debug.Log("Current way point =" + " " + currentWaypoint);
         }
 
 
@@ -165,11 +176,30 @@ public class CustomPathAI : MonoBehaviour
         //rb.MovePosition(rb.position + ((Vector2.up + Vector2.right) * speed * Time.deltaTime));
     }
 
+    public void longJumpRight()
+    {
+        forceMove = false;
+        rb.constraints = RigidbodyConstraints2D.None | RigidbodyConstraints2D.FreezeRotation;
+        rb.AddForce((Vector2.up + Vector2.right) * longJumpForce);
+        Debug.Log("LongJump");
+    }
+
     void OnTriggerEnter2D(Collider2D col)
     {
         if (col.tag == "Obstacle")
         {
             jump();
         }
+        else if (col.tag == "Gap")
+        {
+            //longJump();
+        }
+    }
+
+    public void respawn(float x, float y)
+    {
+        this.transform.position = new Vector2(x, y);
+        rb.constraints = RigidbodyConstraints2D.None | RigidbodyConstraints2D.FreezeRotation;
+        forceMove = false;
     }
 }

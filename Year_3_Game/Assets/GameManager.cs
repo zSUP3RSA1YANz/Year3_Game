@@ -6,6 +6,8 @@ public class GameManager : MonoBehaviour
 {
     public GameObject PlayerHolder;
 
+    public Texture2D mouseLight;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -13,6 +15,8 @@ public class GameManager : MonoBehaviour
 
         PlayerPrefs.SetInt("isSelected", 0);
         PlayerPrefs.SetInt("pathChangable", 0);
+
+        Cursor.SetCursor(mouseLight, Vector2.zero, CursorMode.ForceSoftware);
     }
 
     //// Update is called once per frame
