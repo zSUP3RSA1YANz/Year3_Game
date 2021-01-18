@@ -26,17 +26,11 @@ public class CustomPathAI : MonoBehaviour
     Seeker seeker;
     Rigidbody2D rb;
 
-    private List<GameObject> Boxes = new List<GameObject>();
-
-    GameObject[] boxes; 
-
     // Start is called before the first frame update
     void Start()
     {
         seeker = GetComponent<Seeker>();
         rb = GetComponent<Rigidbody2D>();
-
-        boxes  = GameObject.FindGameObjectsWithTag("Obstacle");
     }
 
     void Update()
@@ -59,11 +53,6 @@ public class CustomPathAI : MonoBehaviour
         {
             transform.localScale = new Vector3(-1f, 1f, 1f);
         }
-
-        if (Input.GetMouseButtonDown(1))
-        {
-            longJumpRight();
-        }
     }
 
     void FixedUpdate()
@@ -71,7 +60,7 @@ public class CustomPathAI : MonoBehaviour
         if (forceMove)
         {
             move();
-            Debug.Log("Moves =" + steps);
+            //Debug.Log("Moves =" + steps);
         }
     }
 
@@ -118,8 +107,8 @@ public class CustomPathAI : MonoBehaviour
         if (path == null)
             return;
 
-        Debug.Log("path size =" + " " + path.vectorPath.Count);
-        Debug.Log("Current way point =" + " " + currentWaypoint);
+        //Debug.Log("path size =" + " " + path.vectorPath.Count);
+        //Debug.Log("Current way point =" + " " + currentWaypoint);
         if (currentWaypoint >= path.vectorPath.Count)
         {
             reachedEndOfPath = true;
@@ -128,7 +117,7 @@ public class CustomPathAI : MonoBehaviour
             PlayerPrefs.SetInt("isSelected", 0);
 
             currentWaypoint = 0;
-        Debug.Log("path ended =" + " " + reachedEndOfPath);
+        //Debug.Log("path ended =" + " " + reachedEndOfPath);
         //    Debug.Log("Selection =" + " " + PlayerPrefs.GetInt("isSelected"));
             //Debug.Log("moving =" + " " + forceMove);
             return;
@@ -171,7 +160,7 @@ public class CustomPathAI : MonoBehaviour
         forceMove = false;
         rb.constraints = RigidbodyConstraints2D.None | RigidbodyConstraints2D.FreezeRotation;
         rb.AddForce((Vector2.up * jumpForce) + jumpDirection);
-        Debug.Log("Jump");
+        //Debug.Log("Jump");
         forceMove = true;
         //rb.MovePosition(rb.position + ((Vector2.up + Vector2.right) * speed * Time.deltaTime));
     }
@@ -181,7 +170,7 @@ public class CustomPathAI : MonoBehaviour
         forceMove = false;
         rb.constraints = RigidbodyConstraints2D.None | RigidbodyConstraints2D.FreezeRotation;
         rb.AddForce((Vector2.up + Vector2.right) * longJumpForce);
-        Debug.Log("LongJump");
+        //Debug.Log("LongJump");
     }
 
     void OnTriggerEnter2D(Collider2D col)
