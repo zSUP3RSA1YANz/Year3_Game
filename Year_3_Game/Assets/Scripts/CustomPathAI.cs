@@ -9,17 +9,29 @@ public class CustomPathAI : MonoBehaviour
     private Vector3 newTargetPos;
 
     public float speed = 200f;
-    public float jumpForce = 200f;
+    public float jumpVForce = 200f;
+    public float jumpHForce = 200f;
+
     public float longJumpForce = 400f;
     public float nextWaypointDistance = 3f;
 
+    public float jumpPrepTime = 1f;
+    public float longJumpPrepTime = 2f;
+
     public bool forceMove;
+    public bool isGrounded = false;
+    public bool isAirborne = false;
 
     private int steps;
 
     public Path path;
     int currentWaypoint = 0;
-    bool reachedEndOfPath = false;
+    public bool reachedEndOfPath = false;
+
+    public bool jumpFromLeftBox = false;
+    public bool jumpFromRightBox = false;
+    public bool longJumpFromLeft = false;
+
 
     private Vector2 jumpDirection;
 
@@ -52,6 +64,20 @@ public class CustomPathAI : MonoBehaviour
         else if (rb.velocity.x <= -0.01f)
         {
             transform.localScale = new Vector3(-1f, 1f, 1f);
+        }
+
+        if (((jumpFromLeftBox || jumpFromRightBox)  && reachedEndOfPath && !isAirborne)/* || Input.GetKeyDown(KeyCode.Space)*/)
+        {
+            StartCoroutine("waitShortJump");
+            //forceMove = false;
+            Debug.Log("HIIII again");
+            Debug.Log(reachedEndOfPath);
+        }
+        else if (longJumpFromLeft && reachedEndOfPath && !isAirborne || Input.GetKeyDown(KeyCode.Space))
+        {
+            StartCoroutine("waitLongJump");
+            Debug.Log("HIIII");
+            Debug.Log(reachedEndOfPath);
         }
     }
 
@@ -105,7 +131,9 @@ public class CustomPathAI : MonoBehaviour
     void move()
     {
         if (path == null)
+        {
             return;
+        }
 
         //Debug.Log("path size =" + " " + path.vectorPath.Count);
         //Debug.Log("Current way point =" + " " + currentWaypoint);
@@ -114,11 +142,19 @@ public class CustomPathAI : MonoBehaviour
             reachedEndOfPath = true;
             forceMove = false;
 
+            path = null;
+
             PlayerPrefs.SetInt("isSelected", 0);
 
             currentWaypoint = 0;
-        //Debug.Log("path ended =" + " " + reachedEndOfPath);
+            Debug.Log("path ended =" + " " + reachedEndOfPath);
         //    Debug.Log("Selection =" + " " + PlayerPrefs.GetInt("isSelected"));
+            //if(jumpFromLeftBox && reachedEndOfPath)
+            //{
+            //    StartCoroutine("wait");
+            //    //jumpRight();
+            //    //jumpFromLeftBox = false;
+            //}
             //Debug.Log("moving =" + " " + forceMove);
             return;
         }
@@ -128,6 +164,7 @@ public class CustomPathAI : MonoBehaviour
             Debug.Log("path size =" + " " + path.vectorPath.Count);
             Debug.Log("Current way point =" + " " + currentWaypoint);
         }
+
 
 
         Vector2 direction = ((Vector2)path.vectorPath[currentWaypoint] - rb.position).normalized;
@@ -144,6 +181,8 @@ public class CustomPathAI : MonoBehaviour
         {
             currentWaypoint++;
         }
+
+        Debug.Log("entries");
     }
 
     void OnPathComplete(Path P)
@@ -155,14 +194,29 @@ public class CustomPathAI : MonoBehaviour
         }
     }
 
-    void jump()
+    public void jumpRight()
     {
         forceMove = false;
         rb.constraints = RigidbodyConstraints2D.None | RigidbodyConstraints2D.FreezeRotation;
-        rb.AddForce((Vector2.up * jumpForce) + jumpDirection);
+        //rb.AddForce((Vector2.up * jumpForce) + jumpDirection);
+        rb.AddForce(((Vector2.up * jumpVForce) + (Vector2.right * jumpHForce)));
+        isAirborne = true;
+        isGrounded = false;
         //Debug.Log("Jump");
-        forceMove = true;
+        //forceMove = true;
         //rb.MovePosition(rb.position + ((Vector2.up + Vector2.right) * speed * Time.deltaTime));
+        jumpFromLeftBox = false;
+        Debug.Log("right jump");
+    }
+    public void jumpLeft()
+    {
+        forceMove = false;
+        rb.constraints = RigidbodyConstraints2D.None | RigidbodyConstraints2D.FreezeRotation;
+        rb.AddForce(((Vector2.up * jumpVForce) + (Vector2.left * jumpHForce)));
+        isAirborne = true;
+        isGrounded = false;
+        jumpFromRightBox = false;
+        Debug.Log("left jump");
     }
 
     public void longJumpRight()
@@ -170,25 +224,52 @@ public class CustomPathAI : MonoBehaviour
         forceMove = false;
         rb.constraints = RigidbodyConstraints2D.None | RigidbodyConstraints2D.FreezeRotation;
         rb.AddForce((Vector2.up + Vector2.right) * longJumpForce);
-        //Debug.Log("LongJump");
+        isAirborne = true;
+        isGrounded = false;
+        longJumpFromLeft = false;
+        Debug.Log("LongJump");
     }
 
     void OnTriggerEnter2D(Collider2D col)
     {
-        if (col.tag == "Obstacle")
-        {
-            jump();
-        }
-        else if (col.tag == "Gap")
-        {
-            //longJump();
-        }
+        //if (col.tag == "Obstacle")
+        //{
+        //    jumpRight();
+        //}
+        //else if (col.tag == "Gap")
+        //{
+        //    //longJump();
+        //}
     }
 
-    public void respawn(float x, float y)
+    public void respawnPos(float x, float y)
     {
         this.transform.position = new Vector2(x, y);
         rb.constraints = RigidbodyConstraints2D.None | RigidbodyConstraints2D.FreezeRotation;
         forceMove = false;
+    }
+
+    public void respawnPosMark(GameObject posMark)
+    {
+        this.transform.position = posMark.transform.position;
+        rb.constraints = RigidbodyConstraints2D.None | RigidbodyConstraints2D.FreezeRotation;
+        forceMove = false;
+    }
+
+    IEnumerator waitShortJump()
+    {
+        yield return new WaitForSeconds(jumpPrepTime);
+        if (jumpFromLeftBox && !isAirborne && reachedEndOfPath)
+            jumpRight();
+        else if (jumpFromRightBox && !isAirborne && reachedEndOfPath)
+            jumpLeft();
+        //jumpFromLeftBox = false;
+    }
+
+    IEnumerator waitLongJump()
+    {
+        yield return new WaitForSeconds(longJumpPrepTime);
+        if(longJumpFromLeft && !isAirborne && reachedEndOfPath)
+        longJumpRight();
     }
 }
