@@ -19,11 +19,12 @@ public class EnemyFlapperMangager : MonoBehaviour
 
     public GameObject player;
 
-    public GameManager GM;
+    private GameManager GM;
 
     // Start is called before the first frame update
     void Start()
     {
+        //get script of all of this enemy type
         flapper1Path = flapper1.GetComponent<Enemy_AI_Path>();
         flapper2Path = flapper2.GetComponent<Enemy_AI_Path>();
         flapper3Path = flapper3.GetComponent<Enemy_AI_Path>();
@@ -31,58 +32,62 @@ public class EnemyFlapperMangager : MonoBehaviour
 
         targetingM = false;
         targetingP = false;
+
+        GM = FindObjectOfType<GameManager>();
     }
 
     // Update is called once per frame
     void Update()
     {
-        //if (Input.GetMouseButtonDown(1))
-        //{
-        //    startTargetingPlayer();
-        //}
+        if (Input.GetMouseButtonDown(1))
+        {
+            startTargetingPlayer();
+        }
 
-        //if(targetingM)
-        //{
-        //    startTargetingMouse();
-        //}
+        if (targetingM)
+        {
+            GM.interactableEffectLooped.transform.position = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+        }
     }
 
+    //targets player
     public void startTargetingPlayer()
     {
-        flapper1Path.targetPlayer();
+        targetingM = false;
+        targetingP = true;
+
+        BroadcastMessage("targetPlayer");
+
         flapper1Path.targetingP = true;
 
-        flapper2Path.targetPlayer();
         flapper2Path.targetingP = true;
 
-        flapper3Path.targetPlayer();
         flapper3Path.targetingP = true;
 
-        flapper4Path.targetPlayer();
         flapper4Path.targetingP = true;
     }
 
+    //targets mouse
     public void startTargetingMouse()
     {
-        flapper1Path.targetMouse();
-        flapper2Path.targetMouse();
-        flapper3Path.targetMouse();
-        flapper4Path.targetMouse();
+        targetingM = true;
+        targetingP = false;
+        BroadcastMessage("targetMouse");
     }
 
+    //reset all enemy pos
     public void resetAllPos()
     {
-        flapper1Path.reset();
-        flapper2Path.reset();
-        flapper3Path.reset();
-        flapper4Path.reset();
+        BroadcastMessage("reset");
     }
 
+    //play particle effect
     public void playEffect()
     {
         GM.playInteractableEffectLooped();
     }
 
+    //stop particle effect
     public void stopEffect()
     {
         if(GM.isPlayingInteractEffectLooped())

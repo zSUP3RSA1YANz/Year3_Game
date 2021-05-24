@@ -7,9 +7,19 @@ public class GameManager : MonoBehaviour
     public GameObject PlayerHolder;
 
     public Texture2D mouseLight;
+    public Vector2 lightOffset;
 
     public GameObject interactableEffect;
     public GameObject interactableEffectLooped;
+
+    public bool tpToStartPos;
+    public Vector3 startPos;
+
+    public GameObject boss1Respawn;
+
+    private GameObject spritePos;
+
+    [SerializeField] private LayerMask inputLayerMask;
 
     // Start is called before the first frame update
     void Start()
@@ -18,25 +28,39 @@ public class GameManager : MonoBehaviour
 
         PlayerPrefs.SetInt("isSelected", 0);
         PlayerPrefs.SetInt("pathChangable", 0);
+        PlayerPrefs.SetInt("playerHit", 0);
 
-        Cursor.SetCursor(mouseLight, Vector2.zero, CursorMode.ForceSoftware);
+        Cursor.SetCursor(mouseLight, Vector2.zero + lightOffset, CursorMode.Auto);
+
+        Camera.main.eventMask = inputLayerMask;
 
         interactableEffect.SetActive(false);
         interactableEffectLooped.SetActive(false);
+
+        if(tpToStartPos)
+        {
+            PlayerHolder.transform.position = startPos;
+        }
+
+        spritePos = GameObject.Find("Player");
+        spritePos.SetActive(false);
     }
 
+    //enables mouse
     public void enableCursor()
     {
         Cursor.visible = true;
         Cursor.lockState = CursorLockMode.None;
     }
 
+    //enables mouse
     public void disableCursor()
     {
         Cursor.visible = false;
         Cursor.lockState = CursorLockMode.Locked;
     }
 
+    //play light effect
     public void playInteractableEffect()
     {
         interactableEffect.transform.position = Camera.main.ScreenToWorldPoint(Input.mousePosition);
@@ -44,6 +68,7 @@ public class GameManager : MonoBehaviour
         interactableEffect.GetComponent<ParticleSystem>().Play();
     }
 
+    //play light effect looped
     public void playInteractableEffectLooped()
     {
         interactableEffectLooped.transform.position = Camera.main.ScreenToWorldPoint(Input.mousePosition);
@@ -51,12 +76,14 @@ public class GameManager : MonoBehaviour
         interactableEffectLooped.GetComponent<ParticleSystem>().Play();
     }
 
+    //stops light effect
     public void stopInteractableEffectLooped()
     {
         interactableEffectLooped.SetActive(false);
         interactableEffectLooped.GetComponent<ParticleSystem>().Stop();
     }
 
+    //checks if light effect playing
     public bool isPlayingInteractEffectLooped()
     {
         if (interactableEffectLooped.GetComponent<ParticleSystem>().isPlaying)
@@ -67,28 +94,29 @@ public class GameManager : MonoBehaviour
             return false;
     }
 
+    //teleports Annie
     public void teleportPlayer(GameObject posMarker)
     {
         PlayerHolder.transform.position = posMarker.transform.position;
         Debug.Log("new level");
     }
 
-    //// Update is called once per frame
-    //void Update()
-    //{
-    //    if (leftMouseClicked() && (PlayerPrefs.GetInt("isSelected") == 1))
-    //    {
-    //        PlayerHolder.GetComponent<CustomPathAI>().setTargetPosition(PlayerPrefs.GetFloat("newTargX"), PlayerPrefs.GetFloat("newTargY"), PlayerPrefs.GetFloat("newTargZ"));
-    //    }
-    //}
+    //teleports Annie in boss area
+    public void teleportPlayerBoss1()
+    {
+        PlayerHolder.transform.position = boss1Respawn.transform.position;
+        Debug.Log("new level");
+    }
 
-    //bool leftMouseClicked()
-    //{
-    //    if (Input.GetMouseButtonDown(0))
-    //    {
-    //        return true;
-    //    }
-    //    else
-    //        return false;
-    //}
+    //activates object
+    public void activateObj(GameObject Obj)
+    {
+        Obj.SetActive(true);
+    }
+
+    //Deactivates object
+    public void DeactivateObj(GameObject Obj)
+    {
+        Obj.SetActive(false);
+    }
 }

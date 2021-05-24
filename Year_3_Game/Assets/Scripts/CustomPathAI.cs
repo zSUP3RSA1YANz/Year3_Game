@@ -32,6 +32,10 @@ public class CustomPathAI : MonoBehaviour
     public bool jumpFromRightBox = false;
     public bool longJumpFromLeft = false;
 
+    AudioSource source;
+    public AudioClip clip;
+
+    [Range(0.01f,1f)]public float footstepSpeed;
 
     private Vector2 jumpDirection;
 
@@ -43,20 +47,13 @@ public class CustomPathAI : MonoBehaviour
     {
         seeker = GetComponent<Seeker>();
         rb = GetComponent<Rigidbody2D>();
+
+        source = GetComponent<AudioSource>();
     }
 
     void Update()
     {
-        //if (leftMouseClicked())
-        //{
-        //    for(var i = 0; i < boxes.Length; i++)
-        //    {
-        //        boxes[i].GetComponent<BoxInteract>().checkForBoxInteraction();
-        //    }
-
-        //    setTargetPosition(PlayerPrefs.GetFloat("newTargX"), PlayerPrefs.GetFloat("newTargY"), PlayerPrefs.GetFloat("newTargZ"));
-        //}
-
+        //Makes Annie Look where she is going
         if (rb.velocity.x >= 0.01f)
         {
             transform.localScale = new Vector3(1f, 1f, 1f);
@@ -66,14 +63,20 @@ public class CustomPathAI : MonoBehaviour
             transform.localScale = new Vector3(-1f, 1f, 1f);
         }
 
-        if (((jumpFromLeftBox || jumpFromRightBox)  && reachedEndOfPath && !isAirborne)/* || Input.GetKeyDown(KeyCode.Space)*/)
+        //plays footsteps
+        if(isGrounded && Mathf.Abs(rb.velocity.x) >= 1f && !source.isPlaying)
+        {
+            footstep();
+        }
+
+        //starts jump
+        if (((jumpFromLeftBox || jumpFromRightBox)  && reachedEndOfPath && !isAirborne))
         {
             StartCoroutine("waitShortJump");
-            //forceMove = false;
             Debug.Log("HIIII again");
             Debug.Log(reachedEndOfPath);
         }
-        else if (longJumpFromLeft && reachedEndOfPath && !isAirborne || Input.GetKeyDown(KeyCode.Space))
+        else if (longJumpFromLeft && reachedEndOfPath && !isAirborne)
         {
             StartCoroutine("waitLongJump");
             Debug.Log("HIIII");
@@ -86,7 +89,6 @@ public class CustomPathAI : MonoBehaviour
         if (forceMove)
         {
             move();
-            //Debug.Log("Moves =" + steps);
         }
     }
 
@@ -100,6 +102,7 @@ public class CustomPathAI : MonoBehaviour
             return false;
     }
 
+    //decides whether to go to mouse or interactable
     public void setTargetPosition(float x, float y, float z)
     {
         if(PlayerPrefs.GetInt("isSelected") == 0)
@@ -111,32 +114,21 @@ public class CustomPathAI : MonoBehaviour
             targetPosition = new Vector3(x, y, z); ;
         }
 
-        //Debug.Log("AI script selection status = " + PlayerPrefs.GetInt("isSelected"));
-
         targetPosition.z = transform.position.z;
         seeker.StartPath(rb.position, targetPosition, OnPathComplete);
         forceMove = true;
 
-       // Debug.Log(PlayerPrefs.GetInt("isSelected"));
     }
-
-    //public void setCustomTargetPosition()
-    //{
-    //    newTargetPos = new Vector3 (PlayerPrefs.GetFloat("newTargX"), PlayerPrefs.GetFloat("newTargY"), PlayerPrefs.GetFloat("newTargZ"));
-    //    newTargetPos.z = transform.position.z;
-    //    seeker.StartPath(rb.position, newTargetPos, OnPathComplete);
-    //    forceMove = true;
-    //}
 
     void move()
     {
+        //checks if there is a path
         if (path == null)
         {
             return;
         }
 
-        //Debug.Log("path size =" + " " + path.vectorPath.Count);
-        //Debug.Log("Current way point =" + " " + currentWaypoint);
+        //checks if Annie has reached destination
         if (currentWaypoint >= path.vectorPath.Count)
         {
             reachedEndOfPath = true;
@@ -148,14 +140,6 @@ public class CustomPathAI : MonoBehaviour
 
             currentWaypoint = 0;
             Debug.Log("path ended =" + " " + reachedEndOfPath);
-        //    Debug.Log("Selection =" + " " + PlayerPrefs.GetInt("isSelected"));
-            //if(jumpFromLeftBox && reachedEndOfPath)
-            //{
-            //    StartCoroutine("wait");
-            //    //jumpRight();
-            //    //jumpFromLeftBox = false;
-            //}
-            //Debug.Log("moving =" + " " + forceMove);
             return;
         }
         else
@@ -166,14 +150,13 @@ public class CustomPathAI : MonoBehaviour
         }
 
 
-
+        //calcuates where to go 
         Vector2 direction = ((Vector2)path.vectorPath[currentWaypoint] - rb.position).normalized;
         Vector2 force = direction * speed * Time.deltaTime;
         jumpDirection = force;
 
+        //moves Annie
         rb.AddForce(force);
-        //rb.constraints = RigidbodyConstraints2D.FreezePositionY | RigidbodyConstraints2D.FreezeRotation;
-        //rb.MovePosition(rb.position + (direction * speed * Time.deltaTime));
 
         float distance = Vector2.Distance(rb.position, path.vectorPath[currentWaypoint]);
 
@@ -185,6 +168,14 @@ public class CustomPathAI : MonoBehaviour
         Debug.Log("entries");
     }
 
+    //randomises footstep sounds
+    void footstep()
+    {
+        source.volume = Random.Range(0.8f, 1f);
+        source.pitch = Random.Range(0.8f, 1.1f);
+        source.Play();
+    }
+
     void OnPathComplete(Path P)
     {
         if(!P.error)
@@ -194,20 +185,19 @@ public class CustomPathAI : MonoBehaviour
         }
     }
 
+    //Annie jumps right
     public void jumpRight()
     {
         forceMove = false;
         rb.constraints = RigidbodyConstraints2D.None | RigidbodyConstraints2D.FreezeRotation;
-        //rb.AddForce((Vector2.up * jumpForce) + jumpDirection);
         rb.AddForce(((Vector2.up * jumpVForce) + (Vector2.right * jumpHForce)));
         isAirborne = true;
         isGrounded = false;
-        //Debug.Log("Jump");
-        //forceMove = true;
-        //rb.MovePosition(rb.position + ((Vector2.up + Vector2.right) * speed * Time.deltaTime));
         jumpFromLeftBox = false;
         Debug.Log("right jump");
     }
+
+    //Annie jumps left
     public void jumpLeft()
     {
         forceMove = false;
@@ -219,6 +209,7 @@ public class CustomPathAI : MonoBehaviour
         Debug.Log("left jump");
     }
 
+    //Annie long jumps right
     public void longJumpRight()
     {
         forceMove = false;
@@ -230,18 +221,7 @@ public class CustomPathAI : MonoBehaviour
         Debug.Log("LongJump");
     }
 
-    void OnTriggerEnter2D(Collider2D col)
-    {
-        //if (col.tag == "Obstacle")
-        //{
-        //    jumpRight();
-        //}
-        //else if (col.tag == "Gap")
-        //{
-        //    //longJump();
-        //}
-    }
-
+    //Annie respawns custom position
     public void respawnPos(float x, float y)
     {
         this.transform.position = new Vector2(x, y);
@@ -249,6 +229,7 @@ public class CustomPathAI : MonoBehaviour
         forceMove = false;
     }
 
+    //Annie respawns marker position
     public void respawnPosMark(GameObject posMark)
     {
         this.transform.position = posMark.transform.position;
@@ -256,6 +237,7 @@ public class CustomPathAI : MonoBehaviour
         forceMove = false;
     }
 
+    //defines Annie prep time for small jump
     IEnumerator waitShortJump()
     {
         yield return new WaitForSeconds(jumpPrepTime);
@@ -263,9 +245,9 @@ public class CustomPathAI : MonoBehaviour
             jumpRight();
         else if (jumpFromRightBox && !isAirborne && reachedEndOfPath)
             jumpLeft();
-        //jumpFromLeftBox = false;
     }
 
+    //defines Annie prep time for big jump
     IEnumerator waitLongJump()
     {
         yield return new WaitForSeconds(longJumpPrepTime);

@@ -8,18 +8,7 @@ public class activatePlayer : MonoBehaviour
     public GameObject backGround;
     public GameManager GM;
 
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
-
+    //Allows Annie to move freely
     public void playerActivate()
     {
         player.GetComponent<Animator>().SetBool("CanWalk", true);

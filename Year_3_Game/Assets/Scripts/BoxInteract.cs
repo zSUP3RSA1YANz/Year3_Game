@@ -73,6 +73,7 @@ public class BoxInteract : MonoBehaviour
             return false;
     }
 
+    //Checks which side of the box the player has clicked
     public void checkForBoxInteraction()
     {
         if (mouseInLeftBoxArea())
@@ -83,8 +84,6 @@ public class BoxInteract : MonoBehaviour
             Debug.Log("LeftSelected");
             passOnInfo(1);
             path.setTargetPosition(PlayerPrefs.GetFloat("newTargX"), PlayerPrefs.GetFloat("newTargY"), PlayerPrefs.GetFloat("newTargZ"));
-            //Debug.Log(PlayerPrefs.GetFloat("newTargX"));
-            //Debug.Log(PlayerPrefs.GetFloat("newTargY"));
 
         }
         else if (mouseInRightBoxArea())
@@ -95,8 +94,6 @@ public class BoxInteract : MonoBehaviour
             Debug.Log("RightSelected");
             passOnInfo(2);
             path.setTargetPosition(PlayerPrefs.GetFloat("newTargX"), PlayerPrefs.GetFloat("newTargY"), PlayerPrefs.GetFloat("newTargZ"));
-            //Debug.Log(PlayerPrefs.GetFloat("newTargX"));
-            //Debug.Log(PlayerPrefs.GetFloat("newTargY"));
 
         }
         else if (mouseInTopBoxArea())
@@ -107,9 +104,8 @@ public class BoxInteract : MonoBehaviour
             Debug.Log("TopSelected = " + PlayerPrefs.GetInt("isSelected"));
             passOnInfo(3);
             path.setTargetPosition(PlayerPrefs.GetFloat("newTargX"), PlayerPrefs.GetFloat("newTargY"), PlayerPrefs.GetFloat("newTargZ"));
-            //Debug.Log(PlayerPrefs.GetFloat("newTargX"));
-            //Debug.Log(PlayerPrefs.GetFloat("newTargY"));
         }
+        //Distinguishes between pushable box or not
         else if (mouseInBoxArea() && isMovable)
         {
             playerDetector.SetActive(false);
@@ -119,11 +115,10 @@ public class BoxInteract : MonoBehaviour
             canPush = true;
             passOnInfo(4);
             path.setTargetPosition(PlayerPrefs.GetFloat("newTargX"), PlayerPrefs.GetFloat("newTargY"), PlayerPrefs.GetFloat("newTargZ"));
-            //Debug.Log(PlayerPrefs.GetFloat("newTargX"));
-            //Debug.Log(PlayerPrefs.GetFloat("newTargY"));
         }
     }
 
+    //Calculates mouse posiition
     Vector3 CalculatedMousePos()
     {
         Vector3 mousePos;
@@ -133,6 +128,7 @@ public class BoxInteract : MonoBehaviour
         return mousePos;
     }
 
+    //Simulates Annie and box moving
     void moveBox()
     {
         rb.bodyType = RigidbodyType2D.Dynamic;
@@ -142,7 +138,7 @@ public class BoxInteract : MonoBehaviour
 
     void passOnInfo(int pos)
     {
-        //LeftBox
+        //LeftBox is clicked
         if (pos == 1)
         {
             if (playerIsLeftOfBox())
@@ -167,7 +163,7 @@ public class BoxInteract : MonoBehaviour
                 Debug.Log("Player on top");
             }
         }
-        //RightBox
+        //RightBox is clicked
         else if (pos == 2)
         {
             if(playerIsRightOfBox())
@@ -192,7 +188,7 @@ public class BoxInteract : MonoBehaviour
                 Debug.Log("Player on top");
             }
         }
-        //TopBox
+        //TopBox is clicked
         else if (pos == 3)
         {
             //player is left of box
@@ -232,6 +228,7 @@ public class BoxInteract : MonoBehaviour
                 Debug.Log("contact =" + contact);
                 rbPlayer = col.gameObject.GetComponent<Rigidbody2D>();
             }
+            //Stops box moving when collides agianst wall
             else if (col.gameObject.tag == "Obstacle")
             {
                 contact = false;
@@ -242,6 +239,7 @@ public class BoxInteract : MonoBehaviour
         }
     }
 
+    //Defines the left region of the clickable area
     bool mouseInLeftBoxArea()
     {
         if ((CalculatedMousePos().x > this.transform.position.x - (3*(this.transform.localScale.x / 2))) && (CalculatedMousePos().x < this.transform.position.x - (this.transform.localScale.x / 2)) &&
@@ -253,6 +251,7 @@ public class BoxInteract : MonoBehaviour
         return false;
     }
 
+    //Defines the right region of the clickable area
     bool mouseInRightBoxArea()
     {
         if ((CalculatedMousePos().x < this.transform.position.x + (3*(this.transform.localScale.x / 2))) && (CalculatedMousePos().x > this.transform.position.x + (this.transform.localScale.x / 2)) &&
@@ -264,6 +263,7 @@ public class BoxInteract : MonoBehaviour
         return false;
     }
 
+    //Defines the top region of the clickable area
     bool mouseInTopBoxArea()
     {
         if ((CalculatedMousePos().x > this.transform.position.x - (this.transform.localScale.x / 2)) && (CalculatedMousePos().x < this.transform.position.x + (this.transform.localScale.x / 2)) &&
@@ -274,6 +274,8 @@ public class BoxInteract : MonoBehaviour
 
         return false;
     }
+
+    //Defines the region of the clickable area in the box
     bool mouseInBoxArea()
     {
         if ((CalculatedMousePos().x > this.transform.position.x - (this.transform.localScale.x / 2)) && (CalculatedMousePos().x < this.transform.position.x + (this.transform.localScale.x / 2)) &&

@@ -7,6 +7,7 @@ public class CameraSwitch : MonoBehaviour
     public GameObject oldCamera;
     public GameObject newCamera;
 
+    //causes camera transiton by deactivating old one and activating new 
     public void switchCamera()
     {
         oldCamera.SetActive(false);

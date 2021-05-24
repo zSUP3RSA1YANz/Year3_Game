@@ -6,15 +6,9 @@ public class activateLight : MonoBehaviour
 {
     public GameObject lightBall;
 
-    // Start is called before the first frame update
+    // Starts the light Animation
     void Start()
     {
         lightBall.SetActive(true);
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
     }
 }

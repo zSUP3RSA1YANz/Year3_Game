@@ -8,30 +8,31 @@ public class ClickDetection : MonoBehaviour
     public GameObject lightEffect;
     private CustomPathAI path;
 
-    // Start is called before the first frame update
+    private bool playLoop = false;
+
     void Start()
     {
         path = player.GetComponent<CustomPathAI>();
         lightEffect.SetActive(false);
     }
 
-    // Update is called once per frame
     void Update()
     {
-        //if(Input.GetMouseButtonDown(0))
-        //{
-        //    Debug.Log("Selection =" + " " + PlayerPrefs.GetInt("isSelected"));
-        //}
+        if (Input.GetMouseButtonDown(1))
+        {
+            Debug.Log(player.transform.position + " " + player.GetComponent<Rigidbody2D>().position);
+        }
     }
 
     void OnMouseDown()
     {
+        //Make Annie go to mouse
         PlayerPrefs.SetInt("isSelected", 0);
         path.setTargetPosition(PlayerPrefs.GetFloat("newTargX"), PlayerPrefs.GetFloat("newTargY"), PlayerPrefs.GetFloat("newTargZ"));
-        //Debug.Log("Selection due to background =" + " " + PlayerPrefs.GetInt("isSelected"));
+
+        //Play particle affect when clicked
         lightEffect.transform.position = Camera.main.ScreenToWorldPoint(Input.mousePosition);
         lightEffect.SetActive(true);
         lightEffect.GetComponent<ParticleSystem>().Play();
-
     }
 }

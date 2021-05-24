@@ -12,18 +12,7 @@ public class activateCage : MonoBehaviour
     [Range(1,5)]
     public float transitionTime;
 
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
-
+    //Activates cutscene when player enters
     void OnTriggerEnter2D(Collider2D col)
     {
         if(col.tag == "Player")
@@ -35,6 +24,7 @@ public class activateCage : MonoBehaviour
         }
     }
 
+    //Makes sure that the trigger cannot be activated again after cutscene
     IEnumerator activeCage()
     {
         yield return new WaitForSeconds(transitionTime);

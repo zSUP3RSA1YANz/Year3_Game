@@ -7,6 +7,7 @@ public class teleport : MonoBehaviour
     public GameManager GM;
     public GameObject posMark;
 
+    //teleports Annie to marker pos
     void OnTriggerEnter2D(Collider2D col)
     {
         if (col.tag == "Player")

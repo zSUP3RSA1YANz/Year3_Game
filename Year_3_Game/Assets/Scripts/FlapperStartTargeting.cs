@@ -4,18 +4,7 @@ using UnityEngine;
 
 public class FlapperStartTargeting : MonoBehaviour
 {
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
-
+    //call to start following Annie
     void OnTriggerEnter2D(Collider2D col)
     {
         if (col.tag == "Player")

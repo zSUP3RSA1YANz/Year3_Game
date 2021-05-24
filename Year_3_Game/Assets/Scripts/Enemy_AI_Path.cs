@@ -43,28 +43,25 @@ public class Enemy_AI_Path : MonoBehaviour
         originPos = this.transform.position;
     }
 
-    void Update()
-    {
-        
-    }
-
+    
     // Update is called once per frame
     void FixedUpdate()
     {
         if (forceMove)
         {
+            //moves enemy
             move();
         }
     }
 
+    //Enemy targets player
     public void targetPlayer()
     {
-        //targetingP = true;
-        //targetingM = false;
         setTargetPosition(player.transform.position);
         InvokeRepeating("UpdatePathPlayer", 0f, .5f);
     }
 
+    //Enemy targets mouse
     public void targetMouse()
     {
         targetingP = false;
@@ -74,6 +71,7 @@ public class Enemy_AI_Path : MonoBehaviour
         Debug.Log("setting target pos");
     }
 
+    //Defines Enemy target
     public void setTargetPosition(Vector3 targetPos)
     {
         targetPosition = targetPos;
@@ -82,6 +80,7 @@ public class Enemy_AI_Path : MonoBehaviour
         forceMove = true;
     }
 
+    //When to calcualte next route when target player
     void UpdatePathPlayer()
     {
         if(seeker.IsDone() && targetingP)
@@ -91,6 +90,7 @@ public class Enemy_AI_Path : MonoBehaviour
         }
     }
 
+    //When to calcualte next route when target playe
     void UpdatePathMouse()
     {
         if(seeker.IsDone() && targetingM)
@@ -99,11 +99,14 @@ public class Enemy_AI_Path : MonoBehaviour
         }
     }
 
+    //moves enemy
     void move()
     {
+        //checks if path
         if (path == null)
             return;
 
+        //checks if completed path
         if (currentWaypoint >= path.vectorPath.Count)
         {
             reachedEndOfPath = true;
@@ -120,9 +123,11 @@ public class Enemy_AI_Path : MonoBehaviour
         }
 
 
+        //calculates direction
         Vector2 direction = ((Vector2)path.vectorPath[currentWaypoint] - rb.position).normalized;
         Vector2 force = direction * speed * Time.deltaTime;
 
+        //moves enemy
         rb.AddForce(force);
 
         float distance = Vector2.Distance(rb.position, path.vectorPath[currentWaypoint]);
@@ -142,6 +147,7 @@ public class Enemy_AI_Path : MonoBehaviour
         }
     }
 
+    //kills Annie, resets Enemy
     void OnCollisionEnter2D(Collision2D col)
     {
         if (col.gameObject.tag == "Player")
@@ -153,11 +159,13 @@ public class Enemy_AI_Path : MonoBehaviour
         }
     }
 
+    //call to reset all Enememies
     void resetCall()
     {
         this.GetComponentInParent<EnemyFlapperMangager>().resetAllPos();
     }
 
+    //goes to orinal pos
     public void reset()
     {
         targetingP = false;
@@ -165,6 +173,7 @@ public class Enemy_AI_Path : MonoBehaviour
         Debug.Log("Reset");
     }
 
+    //distracts enemy with mouse
     void OnMouseDrag()
     {
         if(targetingM)
@@ -173,10 +182,10 @@ public class Enemy_AI_Path : MonoBehaviour
         GetComponentInParent<EnemyFlapperMangager>().startTargetingMouse();
     }
 
+    //enemy resumes attack when mouse released
     void OnMouseUp()
     {
         GetComponentInParent<EnemyFlapperMangager>().stopEffect();
-        //if(GetComponentInParent<EnemyFlapperMangager>().targetingM)
         {
             targetingM = false;
             GetComponentInParent<EnemyFlapperMangager>().targetingM = false;
@@ -184,6 +193,7 @@ public class Enemy_AI_Path : MonoBehaviour
         }
     }
 
+    //plays particale effect
     void OnMouseDown()
     {
         GetComponentInParent<EnemyFlapperMangager>().playEffect();

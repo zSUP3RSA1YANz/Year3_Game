@@ -5,26 +5,27 @@ using UnityEngine;
 public class jumpDetector : MonoBehaviour
 {
     CustomPathAI path;
-    public GameObject player;
-    //public GameObject prevBackground;
-    //public GameObject newBackground;
-    //public GameObject newJumpDetector;
-
-    //public GameObject background1;
-    //public GameObject background2;
-    //public GameObject background3;
+    private GameObject player;
 
     public GameObject jumpPosMark;
 
     public float jumpPrepTime;
 
-    public GameManager GM;
+    private GameManager GM;
+
+    public GameObject clickDetector;
+
+    private AstarPath pathController;
 
     void Start()
     {
+        player = GameObject.FindGameObjectWithTag("Player");
+        GM = FindObjectOfType<GameManager>();
         path = player.GetComponent<CustomPathAI>();
+        pathController = GameObject.Find("A*").GetComponent<AstarPath>();
     }
 
+    //detects mouse
     void OnMouseDown()
     {
         PlayerPrefs.SetInt("isSelected", 1);
@@ -32,31 +33,29 @@ public class jumpDetector : MonoBehaviour
         passOnInfo();
         path.setTargetPosition(PlayerPrefs.GetFloat("newTargX"), PlayerPrefs.GetFloat("newTargY"), PlayerPrefs.GetFloat("newTargZ"));
         Debug.Log("Jump Detector selected");
-        //StartCoroutine("wait");
     }
 
-    void OnTriggerEnter2D()
+    //activates next jump section
+    void OnTriggerEnter2D(Collider2D col)
     {
-        //newBackground.SetActive(true);
-        //newJumpDetector.GetComponent<BoxCollider2D>().enabled = true;
-        //prevBackground.SetActive(false);
-        //this.gameObject.GetComponent<BoxCollider2D>().enabled = false;
+        if(col.CompareTag("Player"))
+        {
+            this.GetComponent<BoxCollider2D>().enabled = false;
+            clickDetector.SetActive(true);
+            pathController.Scan();
+        }
     }
-
+    
+    //resets jump sections
     public void reset()
     {
-        //background1.SetActive(true);
-        //this.gameObject.GetComponent<BoxCollider2D>().enabled = true;
-        //background2.SetActive(false);
-        //background3.SetActive(false);
+        Debug.Log("Jumps reset");
+        this.GetComponent<BoxCollider2D>().enabled = true;
+        clickDetector.SetActive(false);
+        pathController.Scan();
     }
 
-    //IEnumerator wait()
-    //{
-    //    yield return new WaitForSeconds(jumpPrepTime);
-    //    path.longJumpRight();
-    //}
-
+    //carries info of when jump point is
     void passOnInfo()
     {
         PlayerPrefs.SetFloat("newTargX", jumpPosMark.transform.position.x);
